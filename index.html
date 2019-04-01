@@ -4,7 +4,10 @@
     <meta charset="utf-8">
     <title></title>
     <style type="text/css">
-      table, td, th {  
+      span {
+        font-family: monospace;
+      }
+      table, td, th {
        border: 1px solid #ddd;
        text-align: center;
       }
@@ -261,7 +264,9 @@
         else
           return chartCellsSortValues(a)[-1 - idx] - chartCellsSortValues(b)[-1 - idx];
       }
-      var gamesDenominator = 0; // 3;
+      var defaultGamesDenominator = 0; // 3
+      var gamesDenominator = defaultGamesDenominator;
+      var showMinGamesSelectElement = false;
       function getChart(sortColumnIdx, chartLength) {
         if (sortColumnIdx == null)
           sortColumnIdx = chartColumnNames.length;
@@ -431,7 +436,7 @@
         var newTable = chartToTable(chartLength, sortColumnIdx);
         if (t.childSelect != null) {
           newTable.childSelect = t.childSelect;
-          t.childSelect.parentTable = newTable;
+          t.childSelect.forEach(function(s) { s.parentTable = newTable; });
         }
         document.body.removeChild(t);
         document.body.appendChild(newTable);
@@ -481,7 +486,18 @@
         var newTable = chartToTable(chartLength);
         if (t.childSelect != null) {
           newTable.childSelect = t.childSelect;
-          t.childSelect.parentTable = newTable;
+          t.childSelect.forEach(function(s) { s.parentTable = newTable; });
+        }
+        document.body.removeChild(t);
+        document.body.appendChild(newTable);
+      }
+      function onChangeSelect2(event) {
+        var t = event.target.parentTable;
+        gamesDenominator = Number(event.target.value);
+        var newTable = chartToTable(t.chartLength);
+        if (t.childSelect != null) {
+          newTable.childSelect = t.childSelect;
+          t.childSelect.forEach(function(s) { s.parentTable = newTable; });
         }
         document.body.removeChild(t);
         document.body.appendChild(newTable);
@@ -489,6 +505,7 @@
       if (validateStats()) {
         //chartToConsole(true);
         //document.body.appendChild(chartToDiv(false));
+        var sp = document.createElement("span");
         var s = document.createElement("select");
         var i, o;
         for (i = 0; i < Object.keys(Stats).length; i++) {
@@ -500,10 +517,33 @@
           s.appendChild(o);
         }
         s.onchange = onChangeSelect;
+        sp.appendChild(s);
+        var sp2 = document.createElement("span");
+        sp2.appendChild(document.createTextNode(", min games:"))
+        var s2 = document.createElement("select");
+        var o2 = [ ["0%", 0], ["10%", 10], ["20%", 5], ["33%", 3] ];
+        //o2.push(["50%", 2]);
+        //o2.push(["66%", 1.5]);
+        for (i = 0; i < o2.length; i++) {
+          o = document.createElement("option");
+          o.value = o2[i][1];
+          o.appendChild(document.createTextNode(o2[i][0]));
+          if (o.value == defaultGamesDenominator) {
+            gamesDenominator = Number(o.value);
+            o.setAttribute("selected", "selected");
+          }
+          s2.appendChild(o);
+        }
+        s2.onchange = onChangeSelect2;
         var t = chartToTable();
         s.parentTable = t;
-        t.childSelect = s;
-        document.body.appendChild(s);
+        s2.parentTable = t;
+        t.childSelect = [s, s2];
+        sp2.appendChild(s2);
+        if (!showMinGamesSelectElement)
+          sp2.style.display = "none";
+        sp.appendChild(sp2);
+        document.body.appendChild(sp);
         document.body.appendChild(t);
       }
       // Serializing Objects
