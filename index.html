@@ -1,0 +1,496 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <style type="text/css">
+      table, td, th {  
+       border: 1px solid #ddd;
+       text-align: center;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      th, td {
+        padding: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <script language="javascript" type="text/javascript">
+      var nullStats = { games: 0, wins: 0, draws: 0, losses: 0, goals: 0, assists: 0, diff: 0 };
+      var Players = [
+              { name: "Алексей",	stats: Object.assign({}, nullStats) },
+              { name: "Андрей",		stats: Object.assign({}, nullStats) },
+              { name: "Влад",		stats: Object.assign({}, nullStats) },
+              { name: "Денис",		stats: Object.assign({}, nullStats) },
+              { name: "Денис Э",	stats: Object.assign({}, nullStats) },
+              { name: "Женя",		stats: Object.assign({}, nullStats) },
+              { name: "Макс",		stats: Object.assign({}, nullStats) },
+              { name: "Никита",		stats: Object.assign({}, nullStats) },
+              { name: "Саша",		stats: Object.assign({}, nullStats) },
+              { name: "Сергей",		stats: Object.assign({}, nullStats) },
+              { name: "Сергей Ж",	stats: Object.assign({}, nullStats) },
+              { name: "Стас",		stats: Object.assign({}, nullStats) },
+              { name: "Эльдар",		stats: Object.assign({}, nullStats) },
+              { name: "Юра",		stats: Object.assign({}, nullStats) },
+      ];
+
+      var Stats = {
+        "2019-03-10": [
+          {
+            score: 15,
+            players: {
+              "Никита":		{ goals: 10, assists:  3 },
+              "Андрей":		{ goals:  3, assists:  1 },
+              "Макс":		{ goals:  1, assists:  3 },
+              "Юра":		{ goals:  1, assists:  3 },
+              "Влад":		{ goals:  0, assists:  4 },
+            }
+          },
+          {
+            score: 19,
+            players: {
+              "Женя":		{ goals:  9, assists:  2 },
+              "Денис":		{ goals:  4, assists:  2 },
+              "Алексей":	{ goals:  3, assists:  4 },
+              "Стас":		{ goals:  3, assists:  3 },
+              "Сергей Ж":	{ goals:  0, assists:  2 },
+            }
+          }
+        ],
+
+        "2019-03-17": [
+          {
+            score: 24,
+            players: {
+              "Андрей":		{ goals:  8, assists:  4 },
+              "Никита":		{ goals:  7, assists: 10 },
+              "Макс":		{ goals:  5, assists:  5 },
+              "Женя":		{ goals:  4, assists:  3 },
+            }
+          },
+          {
+            score: 16,
+            players: {
+              "Сергей":		{ goals:  7, assists:  3 },
+              "Денис":		{ goals:  4, assists:  0 },
+              "Влад":		{ goals:  3, assists:  2 },
+              "Стас":		{ goals:  2, assists:  4 },
+              "Юра":		{ goals:  0, assists:  5 },
+            }
+          }
+        ],
+
+        "2019-03-24": [
+          {
+            score: 20,
+            players: {
+              "Женя":		{ goals:  5, assists:  6 },
+              "Денис Э":	{ goals:  5, assists:  4 },
+              "Влад":		{ goals:  4, assists:  1 },
+              "Макс":		{ goals:  3, assists:  5 },
+              "Алексей":	{ goals:  0, assists:  0 },
+            }
+          },
+          {
+            score: 13,
+            players: {
+              "Никита":		{ goals:  5, assists:  8 },
+              "Саша":		{ goals:  5, assists:  3 },
+              "Андрей":		{ goals:  4, assists:  3 },
+              "Денис":		{ goals:  1, assists:  1 },
+              "Юра":		{ goals:  1, assists:  1 },
+            }
+          }
+        ],
+
+        "2019-03-31": [
+          {
+            score: 20,
+            players: {
+              "Никита":		{ goals:  6, assists:  6 },
+              "Андрей":		{ goals:  5, assists:  2 },
+              "Саша":		{ goals:  3, assists:  5 },
+              "Эльдар":		{ goals:  3, assists:  4 },
+              "Стас":		{ goals:  1, assists:  0 },
+            }
+          },
+          {
+            score: 11,
+            players: {
+              "Влад":		{ goals:  4, assists:  3 },
+              "Денис Э":	{ goals:  3, assists:  3 },
+              "Женя":		{ goals:  2, assists:  3 },
+              "Макс":		{ goals:  2, assists:  0 },
+              "Юра":		{ goals:  2, assists:  0 },
+              "Денис":		{ goals:  0, assists:  3 },
+            }
+          }
+        ],
+      };
+
+      function validatePlayer(player) {
+        var i;
+        for (i = 0; i < Players.length; i++) {
+          if (player === Players[i].name)
+            return true;
+        }
+        return false;
+      }
+      function validatePlayerGameStats(playerGameStats) {
+        if (!Number.isInteger(playerGameStats["goals"]))
+          return false;
+        if (!Number.isInteger(playerGameStats["assists"]))
+          return false;
+        return true;
+      }
+      function validateTeams(team1, team2) {
+        if (team1 == null || team2 == null)
+          return false;
+        if (Object.keys(team1).length === 0 || Object.keys(team2).length === 0)
+          return false;
+        var i, j;
+        for (j = 0; j < Object.keys(team2).length; j++) {
+          var player2 = Object.keys(team2)[j];
+          if (!validatePlayer(player2))
+            return false;
+          if (!validatePlayerGameStats(team2[player2]))
+            return false;
+        }
+        for (i = 0; i < Object.keys(team1).length; i++) {
+          var player = Object.keys(team1)[i];
+          if (!validatePlayer(player))
+            return false;
+          if (!validatePlayerGameStats(team1[player]))
+            return false;
+          for (j = 0; j < Object.keys(team2).length; j++) {
+            var player2 = Object.keys(team2)[j];
+            if (player === player2)
+              return false;
+          }
+        }
+        return true;
+      }
+      function validateStats() {
+        var i;
+        for (i = 0; i < Object.keys(Stats).length; i++) {
+          var game = Stats[Object.keys(Stats)[i]];
+          if (!Number.isInteger(game[0].score))
+            return false;
+          if (!Number.isInteger(game[1].score))
+            return false;
+          if (!validateTeams(game[0].players, game[1].players))
+            return false;
+        }
+        return true;
+      }
+      function getEff(stats) {
+        return stats.games ? (stats.wins + (stats.draws / 2)) / stats.games : 0.0;
+      }
+      function getGoalsPerGame(stats) {
+        return stats.games ? stats.goals / stats.games : 0.0;
+      }
+      function getPlayerFullStats(playerName, length) {
+        var i;
+        var stats = Object.assign({}, nullStats);
+        stats.eff = 0.0;
+        stats.goalsPerGame = 0.0;
+        for (i = 0; i < Players.length; i++) {
+          if (playerName === Players[i].name) {
+            stats = Object.assign({}, Players[i].stats);
+            stats.eff = getEff(stats);
+            stats.goalsPerGame = getGoalsPerGame(stats);
+            break;
+          }
+        }
+        for (i = 0; i < length; i++) {
+          var game = Stats[Object.keys(Stats)[i]];
+          var teamNumber = 0;
+          var s = game[teamNumber].players[playerName];
+          if (s == null) {
+            teamNumber = 1;
+            s = game[teamNumber].players[playerName];
+          }
+          if (s == null)
+            continue;
+          stats.games++;
+          var diff = game[teamNumber].score - game[1 - teamNumber].score;
+          if (diff > 0)
+            stats.wins++;
+          else if (diff < 0)
+            stats.losses++;
+          else
+            stats.draws++;
+          stats.goals += s.goals;
+          stats.assists += s.assists;
+          stats.diff += diff;
+          stats.eff = getEff(stats);
+          stats.goalsPerGame = getGoalsPerGame(stats);
+        }
+        return stats;
+      }
+      function addRank(chart, field) {
+        var i, j, firstIndexIngroup;
+        chart.sort(function(a, b) { return b.stats[field] - a.stats[field]; });
+        firstIndexIngroup = 0;
+        for (i = 1; i <= chart.length; i++) {
+          if (i < chart.length && chart[i].stats[field] === chart[firstIndexIngroup].stats[field])
+            continue;
+          for (j = firstIndexIngroup; j < i; j++)
+            chart[j].stats[field + "Rank"] = (firstIndexIngroup + 1 + i) / 2;
+          firstIndexIngroup = i;
+        }
+      }
+      function chartSortFunction(a, b, idx) {
+        if (idx === 1)
+          return chartCellsSortValues(a)[0].localeCompare(chartCellsSortValues(b)[0]);
+        else if (idx === -1)
+          return chartCellsSortValues(b)[0].localeCompare(chartCellsSortValues(a)[0]);
+        else if (idx > 0)
+          return chartCellsSortValues(b)[idx - 1] - chartCellsSortValues(a)[idx - 1];
+        else
+          return chartCellsSortValues(a)[-1 - idx] - chartCellsSortValues(b)[-1 - idx];
+      }
+      var gamesDenominator = 0; // 3;
+      function getChart(sortColumnIdx, chartLength) {
+        if (sortColumnIdx == null)
+          sortColumnIdx = chartColumnNames.length;
+        if (chartLength == null)
+          chartLength = Object.keys(Stats).length;
+        var chart = [];
+        var tmpChart = [];
+        var i;
+        var j = 0;
+        var maxGames = 0;
+        for (i = 0; i < Players.length; i++) {
+          tmpChart[i] = { name: Players[i].name, stats: getPlayerFullStats(Players[i].name, chartLength) };
+          if (tmpChart[i].stats.games > maxGames)
+            maxGames = tmpChart[i].stats.games;
+        }
+        for (i = 0; i < tmpChart.length; i++) {
+          if (tmpChart[i].stats.games > 0 && (gamesDenominator === 0 || (gamesDenominator * tmpChart[i].stats.games >= maxGames)))
+            chart[j++] = tmpChart[i];
+        }
+        var ranks = [ "wins", "goals", "assists", "diff", "eff", "goalsPerGame" ];
+        for (j = 0; j < ranks.length; j++)
+          addRank(chart, ranks[j]);
+        for (i = 0; i < chart.length; i++) {
+          chart[i].stats.rankAverage = 0;
+          for (j = 0; j < ranks.length; j++)
+            chart[i].stats.rankAverage += chart[i].stats[ranks[j] + "Rank"];
+          chart[i].stats.rankAverage /= 6;
+        }
+        chart.sort(function(a, b) { return chartSortFunction(a, b, sortColumnIdx); });
+        return chart;
+      }
+      function strTab(str, max) {
+        str = str.toString();
+        var i;
+        s = str + "    ";
+        for (i = 0; i < max - str.length; i++)
+          s += " ";
+        return s;
+      }
+      var chartColumnNames = [
+        "Name            ",
+        "games",
+        "wins(rank)",
+        "draws",
+        "losses",
+        "goals(rank)",
+        "assists(rank)",
+        "diff(rank) ",
+        "eff(rank)  ",
+        "goalsPerGame(rank)",
+        "rankAverage",
+      ];
+      function chartCellsSortValues(chartRow) {
+        return [
+          chartRow.name,
+          chartRow.stats.games,
+          chartRow.stats.wins,
+          chartRow.stats.draws,
+          -chartRow.stats.losses,
+          chartRow.stats.goals,
+          chartRow.stats.assists,
+          chartRow.stats.diff,
+          chartRow.stats.eff,
+          chartRow.stats.goalsPerGame,
+          -chartRow.stats.rankAverage,
+        ];
+      }
+      function chartCellsStr(chartRow) {
+        return [
+          chartRow.name,
+          chartRow.stats.games,
+          chartRow.stats.wins + " (" + chartRow.stats.winsRank.toFixed(1) + ")",
+          chartRow.stats.draws,
+          chartRow.stats.losses,
+          chartRow.stats.goals + " (" + chartRow.stats.goalsRank.toFixed(1) + ")",
+          chartRow.stats.assists + " (" + chartRow.stats.assistsRank.toFixed(1) + ")",
+          chartRow.stats.diff + " (" + chartRow.stats.diffRank.toFixed(1) + ")",
+          parseInt((chartRow.stats.eff * 100), 10) + "% (" + chartRow.stats.effRank.toFixed(1) + ")",
+          chartRow.stats.goalsPerGame.toFixed(2) + " (" + chartRow.stats.goalsPerGameRank.toFixed(1) + ")",
+          chartRow.stats.rankAverage.toFixed(1),
+        ];
+      }
+      function chartToString(multiline) {
+        var chart = getChart();
+        var i, j, cc;
+        var a = [];
+        var c = chartColumnNames;
+        var s = "";
+        for (i = 0; i < c.length; i++)
+          s += strTab(c[i], c[i].length)
+        if (multiline)
+          a.push(s);
+        for (i = 0; i < chart.length; i++) {
+          if (multiline)
+            s = "";
+          else
+            s += "\n";
+          cc = chartCellsStr(chart[i]);
+          for (j = 0; j < cc.length; j++)
+            s += strTab(cc[j], c[j].length);
+          if (multiline)
+            a.push(s);
+        }
+        return multiline ? a : s;
+      }
+      function chartToConsole(multiline) {
+        if (multiline)
+          chartToString(multiline).forEach(function(str) { console.log(str); });
+        else
+          console.log(chartToString(multiline));
+      }
+      function chartToDiv(preContainer) {
+        var d = document.createElement("div");
+        if (preContainer) {
+          var p = document.createElement("pre");
+          p.appendChild(document.createTextNode(chartToString(false)));
+          d.appendChild(p);
+        } else {
+          chartToString(true).forEach(function(str) {
+            var p = document.createElement("p");
+            p.style.fontFamily = "monospace";
+            p.appendChild(document.createTextNode(str.replace(/ /g, "\u00A0")));
+            d.appendChild(p);
+          });
+        }
+        return d;
+      }
+      function createTableRow(arr, sortColumnIdx, rowIdx, prevRowIdx) {
+        var i, td;
+        tr = document.createElement("tr");
+        for (i = 0; i < arr.length; i++) {
+          td = document.createElement("td");
+          if (i === 0 || i === arr.length - 1)
+            td.style.fontWeight = "bold";
+          td.appendChild(document.createTextNode(arr[i]));
+          if (i === 0 && sortColumnIdx === chartColumnNames.length && prevRowIdx != null) {
+            var img = document.createElement("img");
+            img.align = "right";
+            img.style.marginTop = "5px";
+            img.src = prevRowIdx != rowIdx ? prevRowIdx > rowIdx ?
+              "data:image/webp;base64,UklGRlQAAABXRUJQVlA4TEcAAAAvCUACEB8gEEjaH23BEAgkQe2vtkAgGS2z1YNODzCIJKnRkpMIJGABZ+AMC0hARPj8ZyOi/wEFeOSImtALRsMkdhL/yPwUAAA=" :
+              "data:image/webp;base64,UklGRlwAAABXRUJQVlA4TFAAAAAvCUACEB8gEEiC2l9tDQIBiuL/QmMIBJKg9ldbIJCMltnqAbXcd8Cgtm1Y1zyFEEEFzWimgghC+PPwxIjof/4UPjIn8UlsNPSCmpAjlsdSAA==" :
+              "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAABmJLR0QA/wD/AP+gvaeTAAAAGUlEQVQYlWNgGPyAkWHV/3fEKGSitUvoCQB5WQKbZLIXsAAAAABJRU5ErkJggg==";
+            td.appendChild(img);
+          }
+          tr.appendChild(td);
+        }
+        return tr;
+      }
+      function onTableHeaderClick(event) {
+        var sortColumnIdx = event.target.idx + 1;
+        var t = event.target.parentTable;
+        if (sortColumnIdx === t.sortColumnIdx)
+          sortColumnIdx = -sortColumnIdx;
+        var chartLength = t.chartLength;
+        var newTable = chartToTable(chartLength, sortColumnIdx);
+        if (t.childSelect != null) {
+          newTable.childSelect = t.childSelect;
+          t.childSelect.parentTable = newTable;
+        }
+        document.body.removeChild(t);
+        document.body.appendChild(newTable);
+      }
+      function chartToTable(chartLength, sortColumnIdx) {
+        if (chartLength == null)
+          chartLength = Object.keys(Stats).length;
+        var t = document.createElement("table");
+        t.chartLength = chartLength;
+        if (sortColumnIdx == null)
+          sortColumnIdx = chartColumnNames.length;
+        var chart = getChart(sortColumnIdx, chartLength);
+        var prevChart = null;
+        if (sortColumnIdx === chartColumnNames.length && Object.keys(Stats).length > 1)
+          prevChart = getChart(sortColumnIdx, chartLength - 1);
+        t.sortColumnIdx = sortColumnIdx;
+        var i, j, th;
+        var c = chartColumnNames;
+        tr = document.createElement("tr");
+        for (i = 0; i < c.length; i++) {
+          th = document.createElement("th");
+          th.idx = i;
+          th.parentTable = t;
+          th.onclick = onTableHeaderClick;
+          th.appendChild(document.createTextNode(c[i]));
+          tr.appendChild(th);
+        }
+        t.appendChild(tr);
+        var prevRowIdx;
+        for (i = 0; i < chart.length; i++) {
+          prevRowIdx = null;
+          if (prevChart != null) {
+            for (j = 0; j < prevChart.length; j++) {
+              if (chart[i].name === prevChart[j].name && prevChart[j].stats.games > 0) {
+                prevRowIdx = j;
+                break;
+              }
+            }
+          }
+          t.appendChild(createTableRow(chartCellsStr(chart[i]), sortColumnIdx, i, prevRowIdx));
+        }
+        return t;
+      }
+      function onChangeSelect(event) {
+        var t = event.target.parentTable;
+        var chartLength = event.target.value;
+        var newTable = chartToTable(chartLength);
+        if (t.childSelect != null) {
+          newTable.childSelect = t.childSelect;
+          t.childSelect.parentTable = newTable;
+        }
+        document.body.removeChild(t);
+        document.body.appendChild(newTable);
+      }
+      if (validateStats()) {
+        //chartToConsole(true);
+        //document.body.appendChild(chartToDiv(false));
+        var s = document.createElement("select");
+        var i, o;
+        for (i = 0; i < Object.keys(Stats).length; i++) {
+          o = document.createElement("option");
+          o.value = i + 1;
+          o.appendChild(document.createTextNode(Object.keys(Stats)[i]));
+          if (o.value == Object.keys(Stats).length)
+            o.setAttribute("selected", "selected");
+          s.appendChild(o);
+        }
+        s.onchange = onChangeSelect;
+        var t = chartToTable();
+        s.parentTable = t;
+        t.childSelect = s;
+        document.body.appendChild(s);
+        document.body.appendChild(t);
+      }
+      // Serializing Objects
+      // o = {x:1, y:{z:[false,null,""]}}; // Define a test object
+      // s = JSON.stringify(o);            // s is '{"x":1,"y":{"z":[false,null,""]}}'
+      // p = JSON.parse(s);                // p is a deep copy of o
+    </script>
+  </body>
+</html>
