@@ -12,19 +12,35 @@
        text-align: center;
       }
       table {
+        margin-top: 8px;
         font-family: monospace;
         border-collapse: collapse;
+      }
+      #chartTable {
         width: 100%;
       }
-      th {
+      #chartTable th {
         cursor:pointer;
         color:blue;
+      }
+      tr:nth-child(odd) {
+        background-color: #f0f0f0;
+      }
+      th {
+        background-color: #d0d0d0;
       }
       th, td {
         padding: 5px;
       }
       th:first-child, td:first-child {
         text-align: left;
+        font-weight: bold;
+      }
+      th:last-child, td:last-child {
+        font-weight: bold;
+      }
+      #gameTable th:last-child, #gameTable td:last-child {
+        text-align: right;
       }
     </style>
   </head>
@@ -433,8 +449,6 @@
         tr = document.createElement("tr");
         for (i = 0; i < arr.length; i++) {
           td = document.createElement("td");
-          if (i === 0 || i === arr.length - 1)
-            td.style.fontWeight = "bold";
           td.appendChild(document.createTextNode(arr[i]));
           if (i === 0 && sortColumnIdx === chartColumnNames.length && prevRowIdx != null) {
             var img = document.createElement("img");
@@ -452,22 +466,73 @@
       }
       function onTableHeaderClick(event) {
         var sortColumnIdx = event.target.idx + 1;
-        var t = event.target.parentTable;
+        var t = document.getElementById("chartTable");
         if (sortColumnIdx === t.sortColumnIdx)
           sortColumnIdx = -sortColumnIdx;
         var chartLength = t.chartLength;
         var newTable = chartToTable(chartLength, sortColumnIdx);
-        if (t.childSelect != null) {
-          newTable.childSelect = t.childSelect;
-          t.childSelect.forEach(function(s) { s.parentTable = newTable; });
+        document.body.replaceChild(newTable, t);
+      }
+      var gameColumnNames = [
+        "Name",
+        "goals(assists)",
+      ];
+      function gameCellsValues(players, idx) {
+        return [
+          Object.keys(players)[idx],
+          players[Object.keys(players)[idx]].goals + " (" +
+            players[Object.keys(players)[idx]].assists + ")",
+        ];
+      }
+      function gameToTable(dateIdx) {
+        var gameStats = Stats[Object.keys(Stats)[dateIdx]];
+        var rowsNum = Math.max(Object.keys(gameStats[0]["players"]).length,
+          Object.keys(gameStats[1]["players"]).length) + 1;
+        var t = document.createElement("table");
+        t.id = "gameTable";
+        var i, j, th, tr, td;
+        tr = document.createElement("tr");
+        for (i = 0; i < gameColumnNames.length; i++) {
+          th = document.createElement("th");
+          th.appendChild(document.createTextNode(gameColumnNames[i]));
+          tr.appendChild(th);
         }
-        document.body.removeChild(t);
-        document.body.appendChild(newTable);
+        for (i = 0; i < 2; i++) {
+          th = document.createElement("th");
+          th.appendChild(document.createTextNode(gameStats[i].score));
+          th.rowSpan = rowsNum;
+          tr.appendChild(th);
+        }
+        for (i = gameColumnNames.length - 1; i >= 0; i--) {
+          th = document.createElement("th");
+          th.appendChild(document.createTextNode(gameColumnNames[i]));
+          tr.appendChild(th);
+        }
+        t.appendChild(tr);
+        var player;
+        for (i = 0; i < rowsNum - 1; i++) {
+          tr = document.createElement("tr");
+          for (j = 0; j < gameColumnNames.length; j++) {
+            td = document.createElement("td");
+            if (i < Object.keys(gameStats[0]["players"]).length)
+              td.appendChild(document.createTextNode(gameCellsValues(gameStats[0].players, i)[j]));
+            tr.appendChild(td);
+          }
+          for (j = gameColumnNames.length - 1; j >= 0; j--) {
+            td = document.createElement("td");
+            if (i < Object.keys(gameStats[1]["players"]).length)
+              td.appendChild(document.createTextNode(gameCellsValues(gameStats[1].players, i)[j]));
+            tr.appendChild(td);
+          }
+          t.appendChild(tr);
+        }
+        return t;
       }
       function chartToTable(chartLength, sortColumnIdx) {
         if (chartLength == null)
           chartLength = Object.keys(Stats).length;
         var t = document.createElement("table");
+        t.id = "chartTable";
         t.chartLength = chartLength;
         if (sortColumnIdx == null)
           sortColumnIdx = chartColumnNames.length;
@@ -482,7 +547,6 @@
         for (i = 0; i < c.length; i++) {
           th = document.createElement("th");
           th.idx = i;
-          th.parentTable = t;
           th.onclick = onTableHeaderClick;
           th.appendChild(document.createTextNode(c[i].replace(/ /g, "\u00A0")));
           tr.appendChild(th);
@@ -504,26 +568,16 @@
         return t;
       }
       function onChangeSelect(event) {
-        var t = event.target.parentTable;
-        var chartLength = event.target.value;
-        var newTable = chartToTable(chartLength);
-        if (t.childSelect != null) {
-          newTable.childSelect = t.childSelect;
-          t.childSelect.forEach(function(s) { s.parentTable = newTable; });
-        }
-        document.body.removeChild(t);
-        document.body.appendChild(newTable);
+        document.body.replaceChild(chartToTable(event.target.value),
+          document.getElementById("chartTable"));
+        document.body.replaceChild(gameToTable(event.target.value - 1),
+          document.getElementById("gameTable"));
       }
       function onChangeSelect2(event) {
-        var t = event.target.parentTable;
+        var t = document.getElementById("chartTable");
         gamesDenominator = Number(event.target.value);
         var newTable = chartToTable(t.chartLength);
-        if (t.childSelect != null) {
-          newTable.childSelect = t.childSelect;
-          t.childSelect.forEach(function(s) { s.parentTable = newTable; });
-        }
-        document.body.removeChild(t);
-        document.body.appendChild(newTable);
+        document.body.replaceChild(newTable, t);
       }
       if (validateStats()) {
         //chartToConsole(true);
@@ -558,16 +612,14 @@
           s2.appendChild(o);
         }
         s2.onchange = onChangeSelect2;
-        var t = chartToTable();
-        s.parentTable = t;
-        s2.parentTable = t;
-        t.childSelect = [s, s2];
+        var t = chartToTable(s.value);
         sp2.appendChild(s2);
         if (!showMinGamesSelectElement)
           sp2.style.display = "none";
         sp.appendChild(sp2);
         document.body.appendChild(sp);
         document.body.appendChild(t);
+        document.body.appendChild(gameToTable(s.value - 1));
       }
       // Serializing Objects
       // o = {x:1, y:{z:[false,null,""]}}; // Define a test object
